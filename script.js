@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
         7: { tipo: 'nevoa_densa', volume: 250, dispersao: 250, nome: 'Névoa Densa de Alta Velocidade' }
     };
 
-    // --- LÓGICA DE PADRÃO E ALEATORIEDADE ---
     function obterParametros() {
         const perfilArma = perfisDeSangramento[ferramentaAtual.toUpperCase()];
         if (!perfilArma) return tiposDePadrao[0];
@@ -57,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return tiposDePadrao[nivelDeSangramento] || tiposDePadrao[0];
     }
 
-    // Variação realista (80% - 120% do volume base)
     function quantidadeAleatoria(volumeBase) {
         const min = Math.floor(volumeBase * 0.8);
         const max = Math.ceil(volumeBase * 1.2);
@@ -65,19 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    // Calcula o ângulo de impacto (degree), direção e área da mancha
     function calcularAnaliseMancha(width, length, origem, x, y) {
-        // Ângulo de impacto (em graus)
         const angleRad = Math.asin(width / length);
         const angleDeg = angleRad * (180 / Math.PI);
-
-        // Direção da mancha
         const dx = x - origem.x;
         const dy = y - origem.y;
         const directionRad = Math.atan2(dy, dx);
         const directionDeg = directionRad * (180 / Math.PI);
-
-        // Área da mancha (aproximada elipse)
         const area = Math.PI * (width/2) * (length/2);
 
         return {
@@ -88,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calcularPontoOrigem(anguloImpactoRad, distancia) {
-        // altura = distância * tan(θ)
         return distancia * Math.tan(anguloImpactoRad);
     }
 
@@ -125,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!mancha.corBase) mancha.corBase = [130 + Math.random() * 30, 0, 0];
             manchas.push(mancha);
 
-            // Cálculos BPA para cada mancha
             let width = mancha.largura;
             let length = mancha.comprimento;
             if (width > length) [width, length] = [length, width];
@@ -163,12 +153,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ANIMAÇÃO E DESENHO ---
     function loopDeAnimacao() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Desenha o ponto central da parede (origem de emissão do sangue)
+        drawOriginPoint();
+
         for (let i = manchas.length - 1; i >= 0; i--) {
             const mancha = manchas[i];
             if (mancha.highlight > 0) mancha.highlight -= 0.016;
             desenharMancha(mancha);
         }
         requestAnimationFrame(loopDeAnimacao);
+    }
+
+    function drawOriginPoint() {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(origem.x, origem.y, 5, 0, 2 * Math.PI, false);
+        ctx.fillStyle = '#333';
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 0;
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
     }
 
     function desenharMancha(mancha) {
@@ -220,7 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Mostra só a primeira análise detalhada (mancha de referência)
         let analise = (analiseBatch && analiseBatch.analises && analiseBatch.analises.length) ? analiseBatch.analises[0] : null;
         let angle = analise && analise.angleDeg ? analise.angleDeg.toFixed(2) : '—';
         let direction = analise && analise.directionDeg ? analise.directionDeg.toFixed(1) : '—';
