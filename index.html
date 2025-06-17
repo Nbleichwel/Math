@@ -46,8 +46,7 @@
                 </div>
             </div>
 
-            <div id="canvas-container">
-                </div>
+            <div id="canvas-container"></div>
 
             <div id="controls-container">
                 <button id="clearButton">Limpar Simulação</button>
@@ -56,8 +55,7 @@
                     <div id="event-description">
                         <p class="placeholder">Selecione as opções e clique na parede para simular.</p>
                     </div>
-                    <div id="info-content">
-                        </div>
+                    <div id="info-content"></div>
                 </div>
             </div>
         </main>
@@ -70,28 +68,36 @@
                 </summary>
                 <div class="explanation-content">
                     <h4>Física e Geometria do Impacto</h4>
-                    <p>Gotas de sangue em voo mantêm uma forma esférica devido à tensão superficial. Ao atingir uma superfície, a geometria da mancha revela o ângulo do impacto. Um impacto a 90° cria uma mancha circular. Ângulos menores criam elipses progressivamente mais alongadas.</p>
-                    
+                    <p>Gotas de sangue viajam como pequenas esferas devido à tensão superficial. Quando atingem uma superfície, a forma deixada revela o ângulo em que chegaram:</p>
+                    <ul>
+                        <li><strong>Impacto perpendicular (90°):</strong> Mancha quase circular.</li>
+                        <li><strong>Impacto inclinado (menor que 90°):</strong> Mancha elíptica, cada vez mais alongada conforme o ângulo diminui.</li>
+                    </ul>
+
                     <h4>Trigonometria na Reconstituição</h4>
-                    <p>A perícia utiliza trigonometria para "reverter" a trajetória das gotas. As duas fórmulas principais são:</p>
+                    <p>Peritos usam a geometria das manchas para reconstruir a trajetória reversa das gotas. Dois cálculos principais são:</p>
                     <ul>
                         <li>
-                            <strong>Ângulo de Impacto (α):</strong> Determinado pela relação entre a largura e o comprimento da mancha.
-                            <code>α = arcsin(Largura / Comprimento)</code>
+                            <strong>Ângulo de Impacto (α):</strong><br>
+                            Determinado pela razão entre largura e comprimento da mancha.<br>
+                            <code>α = arcsin(largura / comprimento)</code>
                         </li>
                         <li>
-                            <strong>Ponto de Origem (Altura H):</strong> Calculado usando o ângulo de impacto e a distância (d) da mancha até a área de convergência no plano.
-                            <code>H = tan(α) * d</code>
+                            <strong>Ponto de Origem (Altura H):</strong><br>
+                            Calculado usando o ângulo de impacto e a distância (d) do centro da mancha até a área de convergência no plano.<br>
+                            <code>H = tan(α) × d</code>
                         </li>
                     </ul>
 
                     <h4>Padrões de Velocidade</h4>
-                    <p>A energia do impacto determina o padrão do respingo. O simulador representa três categorias:</p>
+                    <p>A energia do impacto define o padrão do respingo:</p>
                     <ul>
-                        <li><strong>Baixa Velocidade (Faca):</strong> Gotas grandes, formadas pela gravidade.</li>
-                        <li><strong>Média Velocidade (Soco, Martelo):</strong> Gotas menores, resultantes de um impacto contundente.</li>
-                        <li><strong>Alta Velocidade (Pistola):</strong> Gotículas minúsculas (<1mm) formando uma "névoa", causadas pela alta energia de um projétil.</li>
+                        <li><strong>Baixa Velocidade (Faca):</strong> Gotas grandes, caindo pela gravidade.</li>
+                        <li><strong>Média Velocidade (Soco, Martelo):</strong> Gotas médias, resultado de impacto contundente.</li>
+                        <li><strong>Alta Velocidade (Pistola):</strong> Minúsculas gotículas (&lt;1mm) formando uma névoa, causadas por projétil de alta energia.</li>
                     </ul>
+                    <p><strong>Resumo:</strong><br>
+                    O padrão, o tamanho e a forma das manchas permitem, através de leis da física e matemática, reconstruir eventos em cenas de crime.</p>
                 </div>
             </details>
         </section>
