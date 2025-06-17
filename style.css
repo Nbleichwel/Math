@@ -1,0 +1,347 @@
+:root {
+    --bg-color: #121212;
+    --surface-color: #1E1E1E;
+    --primary-color: #E63946;
+    --text-primary: #EAEAEA;
+    --text-secondary: #A0A0A0;
+    --border-color: #333333;
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'Source Code Pro', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.main-container {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+/* --- CORREÇÃO DO TÍTULO --- */
+.site-header {
+    width: 100%; /* Garante que o container ocupe toda a largura disponível */
+    text-align: center; /* Agora o texto pode ser centralizado corretamente */
+    margin-bottom: 10px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 500px;
+    margin-top: 10px;
+    display: inline-block; /* Ajuda a centralizar corretamente com o text-align */
+}
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background-color: var(--surface-color);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.tool-button {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* --- NOVA ANIMAÇÃO DE HOVER --- */
+.tool-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.tool-button.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.force-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 15px;
+    background-color: var(--surface-color);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    width: 100%;
+    max-width: 400px;
+}
+
+.force-controls label {
+    font-weight: 600;
+}
+
+.force-controls input[type="range"] {
+    flex-grow: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--border-color);
+    height: 8px;
+    border-radius: 5px;
+    outline: none;
+}
+.force-controls input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+.force-controls input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* --- NOVA ANIMAÇÃO NO SLIDER --- */
+.force-controls input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+.force-controls span {
+    font-weight: 600;
+    color: var(--text-primary);
+    width: 50px;
+    text-align: center;
+}
+
+.simulation-area {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+#canvas-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    background-image: linear-gradient(rgba(18, 18, 18, 0.7), rgba(18, 18, 18, 0.7)), url('https://png.pngtree.com/background/20230524/original/pngtree-utilizing-black-brick-wall-texture-illustration-as-versatile-background-and-wallpaper-picture-image_2729994.jpg');
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#controls-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#clearButton {
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--primary-color);
+    background-color: transparent;
+    color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* --- NOVA ANIMAÇÃO DE HOVER --- */
+#clearButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background-color: var(--primary-color);
+    color: var(--text-primary);
+}
+
+#infoPanel {
+    width: 100%;
+    padding: 25px;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    text-align: left;
+}
+
+#infoPanel h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#infoPanel #tool-description {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#infoPanel #tool-description p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+#info-content .placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.info-group {
+    margin-bottom: 25px;
+}
+.info-group:last-child {
+    margin-bottom: 0;
+}
+
+.info-group p {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.info-group .formula, .info-group .calculation {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    background-color: var(--bg-color);
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    display: block;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.info-group .calculation {
+    margin-top: 8px;
+    background-color: #242424;
+}
+
+.info-group .result {
+    font-weight: 600;
+    color: #48cae4;
+}
+
+.scientific-explanation {
+    width: 100%;
+    margin-top: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--surface-color);
+    transition: all 0.2s ease;
+}
+
+.scientific-explanation summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.2s ease;
+}
+
+/* --- NOVA ANIMAÇÃO DE HOVER --- */
+.scientific-explanation:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-color: #555;
+}
+
+
+.scientific-explanation summary .icon {
+    font-size: 1.5rem;
+    font-weight: 400;
+    transition: transform 0.3s ease;
+}
+
+.scientific-explanation details[open] > summary .icon {
+    transform: rotate(45deg);
+}
+
+.scientific-explanation summary::-webkit-details-marker {
+    display: none;
+}
+
+.explanation-content {
+    padding: 0 25px 25px 25px;
+    border-top: 1px solid var(--border-color);
+    line-height: 1.7;
+    color: var(--text-secondary);
+}
+
+.explanation-content h4 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.explanation-content ul {
+    list-style-position: inside;
+    padding-left: 10px;
+}
+
+.explanation-content li {
+    margin-bottom: 10px;
+}
+
+.explanation-content code {
+    font-family: var(--font-mono);
+    background-color: var(--bg-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #a8dadc;
+}
