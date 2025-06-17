@@ -17,16 +17,33 @@
 
         <main class="simulation-area">
             <div class="toolbar">
-                <button class="tool-button" data-tool="soco">Soco</button>
                 <button class="tool-button active" data-tool="martelo">Martelo</button>
+                <button class="tool-button" data-tool="soco">Soco</button>
                 <button class="tool-button" data-tool="faca">Faca</button>
                 <button class="tool-button" data-tool="pistola">Pistola</button>
             </div>
 
-            <div class="force-controls">
-                <label for="forceSlider">Força:</label>
-                <input type="range" id="forceSlider" min="1" max="3" value="2">
-                <span id="forceValue">Média</span>
+            <div class="simulation-controls">
+                <div class="control-group" id="force-control-group">
+                    <label for="forceSlider">Força:</label>
+                    <input type="range" id="forceSlider" min="1" max="3" value="2" step="1">
+                    <span id="forceValue">Média</span>
+                </div>
+                <div class="control-group">
+                    <label for="bodyPartSelect">Região Alvo:</label>
+                    <select id="bodyPartSelect">
+                        <option value="TORAX">Tórax</option>
+                        <option value="CABECA">Cabeça</option>
+                        <option value="PESCOCO">Pescoço</option>
+                        <option value="ROSTO">Rosto</option>
+                        <option value="ABDOMEN">Abdômen</option>
+                        <option value="COSTAS">Costas</option>
+                        <option value="BRACOS">Braços</option>
+                        <option value="PERNAS">Pernas</option>
+                        <option value="MAOS">Mãos</option>
+                        <option value="PES">Pés</option>
+                    </select>
+                </div>
             </div>
 
             <div id="canvas-container">
@@ -35,13 +52,12 @@
             <div id="controls-container">
                 <button id="clearButton">Limpar Simulação</button>
                 <div id="infoPanel">
-                    <h3>Análise da Agressão</h3>
-                    <div id="tool-description">
-                        <p><strong>Martelo:</strong> Objeto contundente que causa impacto de média velocidade, gerando respingos radiais.</p>
+                    <h3>Análise do Evento</h3>
+                    <div id="event-description">
+                        <p class="placeholder">Aguardando simulação...</p>
                     </div>
                     <div id="info-content">
-                        <p class="placeholder">Selecione uma ferramenta e clique na parede para simular um impacto.</p>
-                    </div>
+                        </div>
                 </div>
             </div>
         </main>
@@ -79,7 +95,8 @@
                 </div>
             </details>
         </section>
-        </div>
+        
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
