@@ -24,25 +24,25 @@ document.addEventListener('DOMContentLoaded', () => {
     let manchas = [];
     const origem = { x: canvas.width / 2, y: canvas.height * 0.4, z: 120 };
 
-    // --- MATRIZ DE SANGRAMENTO ---
+    // --- MATRIZ DE SANGRAMENTO (BASEADA NA SUA TABELA) ---
     const perfisDeSangramento = {
         SOCO:    { CABECA: [1, 2, 3], ROSTO: [2, 2, 3], PESCOCO: [1, 2, 2], TORAX: [0, 1, 1], ABDOMEN: [0, 0, 0], COSTAS: [0, 0, 0], BRACOS: [0, 1, 1], PERNAS: [0, 1, 1], MAOS: [0, 1, 1], PES: [0, 1, 1] },
         MARTELO: { CABECA: [2, 3, 4], ROSTO: [2, 3, 3], PESCOCO: [2, 3, 3], TORAX: [1, 2, 3], ABDOMEN: [1, 1, 2], COSTAS: [1, 1, 2], BRACOS: [1, 2, 2], PERNAS: [1, 2, 2], MAOS: [1, 1, 2], PES: [1, 1, 2] },
         FACA:    { CABECA: [2, 2, 3], ROSTO: [2, 2, 2], PESCOCO: [2, 3, 5], TORAX: [3, 3, 4], ABDOMEN: [2, 2, 2], COSTAS: [2, 2, 2], BRACOS: [2, 3, 4], PERNAS: [2, 3, 4], MAOS: [2, 2, 2], PES: [2, 2, 2] },
-        PISTOLA: { CABECA: [6], ROSTO: [6], PESCOCO: [7], TORAX: [7], ABDOMEN: [3, 4], COSTAS: [3, 4], BRACOS: [2], PERNAS: [2], MAOS: [1], PES: [1] }
+        PISTOLA: { CABECA: [7], ROSTO: [6], PESCOCO: [7], TORAX: [7], ABDOMEN: [3, 4], COSTAS: [3, 4], BRACOS: [2, 5], PERNAS: [2, 5], MAOS: [1, 2], PES: [1, 2] }
     };
     const tiposDePadrao = {
         0: { tipo: 'nenhum', nome: 'Sem Sangramento Visível' },
-        1: { tipo: 'gotejamento', volume: 5, dispersao: 10, nome: 'Gotejamento Leve' },
-        2: { tipo: 'gotejamento_medio', volume: 15, dispersao: 30, nome: 'Gotejamento Moderado' },
+        1: { tipo: 'gotejamento', volume: 5, dispersao: 10, nome: 'Gotejamento Leve (Localizado)' },
+        2: { tipo: 'gotejamento_medio', volume: 15, dispersao: 30, nome: 'Gotejamento Moderado (Localizado)' },
         3: { tipo: 'impacto', volume: 25, dispersao: 60, nome: 'Impacto de Média Velocidade' },
         4: { tipo: 'impacto_forte', volume: 40, dispersao: 120, nome: 'Impacto Forte' },
-        5: { tipo: 'jato_arterial', volume: 80, dispersao: 180, nome: 'Jato Arterial' },
+        5: { tipo: 'jato_arterial', volume: 40, dispersao: 150, nome: 'Jato Arterial (Spurting)' },
         6: { tipo: 'nevoa_media', volume: 150, dispersao: 200, nome: 'Névoa de Alta Velocidade' },
         7: { tipo: 'nevoa_densa', volume: 250, dispersao: 250, nome: 'Névoa Densa de Alta Velocidade' }
     };
     const classMap = { 0: 'level-0', 1: 'level-1', 2: 'level-1', 3: 'level-2', 4: 'level-2', 5: 'level-3', 6: 'level-3', 7: 'level-3' };
-    
+
     // --- FUNÇÕES DE LÓGICA E SIMULAÇÃO ---
     function obterParametros() {
         const perfilArma = perfisDeSangramento[ferramentaAtual.toUpperCase()];
@@ -52,8 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!niveis) return tiposDePadrao[0];
 
         let nivelDeSangramento;
-        if (ferramentaAtual === 'pistola') {
-            nivelDeSangramento = niveis.length > 1 ? niveis[Math.floor(Math.random() * niveis.length)] : niveis[0];
+        if (ferramentaAtual === 'pistola' || (ferramentaAtual === 'faca' && ['BRACOS', 'PERNAS', 'PESCOCO'].includes(regiaoAtual))) {
+            nivelDeSangramento = niveis[Math.floor(Math.random() * niveis.length)];
         } else {
             nivelDeSangramento = niveis[forceLevel - 1];
         }
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function simularPadrao(clickX, clickY, parametros) {
         if (parametros.tipo === 'nenhum') {
-            return; // Apenas para a simulação, o painel já foi atualizado
+            return;
         }
 
         let numeroDeGotas = Math.floor(parametros.volume * (0.8 + Math.random() * 0.4));
@@ -71,13 +71,17 @@ document.addEventListener('DOMContentLoaded', () => {
             let mancha;
             const { mancha: manchaBase } = calcularPropriedadesImpacto(clickX, clickY);
 
-            if (parametros.tipo.includes('nevoa')) {
+            if (parametros.tipo === 'jato_arterial') {
+                const progress = i / numeroDeGotas;
+                const arcX = clickX + progress * parametros.dispersao - (parametros.dispersao / 2);
+                const arcY = clickY - Math.sin(progress * Math.PI) * (parametros.dispersao * 0.4);
+                mancha = { ...manchaBase, x: arcX, y: arcY, comprimento: 15 + Math.random() * 5, largura: 10 + Math.random() * 5, tipo: 'gota' };
+            } else if (parametros.tipo.includes('nevoa')) {
                 const anguloDispersao = Math.random() * 2 * Math.PI;
                 const raioDispersao = Math.random() * parametros.dispersao;
                 mancha = { ...manchaBase, x: clickX + Math.cos(anguloDispersao) * raioDispersao, y: clickY + Math.sin(anguloDispersao) * raioDispersao, comprimento: 1 + Math.random() * 2, largura: 1 + Math.random() * 2, tipo: 'nevoa', highlight: 0, opacity: 0.7 };
-            } else if (parametros.tipo.includes('gotejamento') || parametros.tipo.includes('jato_arterial')) {
-                const dispersao = parametros.dispersao || 10;
-                mancha = { ...manchaBase, x: clickX + (Math.random() - 0.5) * dispersao, y: clickY + (Math.random() - 0.5) * dispersao, comprimento: 20 + Math.random() * 10, largura: 18 + Math.random() * 8, tipo: 'gota' };
+            } else if (parametros.tipo.includes('gotejamento')) {
+                mancha = { ...manchaBase, x: clickX + (Math.random() - 0.5) * parametros.dispersao, y: clickY + (Math.random() - 0.5) * parametros.dispersao, comprimento: 20 + Math.random() * 10, largura: 18 + Math.random() * 8, tipo: 'gota' };
             } else { // Impacto
                 const dispersao = parametros.dispersao || 60;
                 const clusterX = clickX + (Math.random() - 0.5) * dispersao;
@@ -195,11 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>Cálculo de Referência do Impacto (α)</p>
                 <code class="formula">α = arctan(Profundidade / Distância)</code>
                 <code class="calculation">↳ α = arctan(${origem.z.toFixed(0)} / ${distancia.toFixed(0)}) = <span class="result">${anguloGraus.toFixed(2)}°</span></code>
-            </div>
-            <div class="info-group">
-                <p>Cálculo de Referência da Largura</p>
-                <code class="formula">Largura = Comprimento * sen(α)</code>
-                <code class="calculation">↳ Largura = ${manchaRef.comprimento.toFixed(2)} * sen(${anguloGraus.toFixed(2)}°) = <span class="result">${(manchaRef.comprimento * Math.sin(alfa)).toFixed(2)} px</span></code>
             </div>`;
     }
 
@@ -229,18 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- EVENTOS ---
     function handleUserInteraction() {
-        atualizarIndicadoresDeSangramento();
         const parametros = obterParametros();
-        const arma = ferramentaAtual.charAt(0).toUpperCase() + ferramentaAtual.slice(1);
-        const regiao = bodyPartSelect.options[bodyPartSelect.selectedIndex].text;
-        const forca = forceValueDisplay.textContent;
-        const textoForca = ferramentaAtual !== 'pistola' ? ` com força ${forca.toLowerCase()}` : '';
-
-        eventDescription.innerHTML = `
-            <p><strong>Cenário Atual:</strong> ${arma} na região da(o) ${regiao.toLowerCase()}${textoForca}.</p>
-            <p><strong>Pronto para simular.</strong> Clique na parede.</p>
-        `;
-        infoContent.innerHTML = '';
+        atualizarPaineis(parametros, 0, 0);
+        infoContent.innerHTML = '<p class="placeholder">Clique na parede para simular o impacto.</p>';
     }
     
     toolButtons.forEach(button => button.addEventListener('click', () => {
@@ -248,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.classList.add('active');
         ferramentaAtual = button.dataset.tool;
         forceControlGroup.style.visibility = (ferramentaAtual === 'pistola') ? 'hidden' : 'visible';
+        atualizarIndicadoresDeSangramento();
         handleUserInteraction();
     }));
 
@@ -267,8 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     clearButton.addEventListener('click', () => {
         manchas = [];
-        infoContent.innerHTML = '<p class="placeholder">Aguardando simulação...</p>';
-        handleUserInteraction();
+        infoContent.innerHTML = '';
+        eventDescription.innerHTML = '<p class="placeholder">Aguardando simulação...</p>';
     });
     
     canvas.addEventListener('click', (e) => {
@@ -287,6 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function inicializar() {
         forceSlider.dispatchEvent(new Event('input'));
         handleUserInteraction();
+        atualizarIndicadoresDeSangramento();
         loopDeAnimacao();
     }
     
