@@ -1,0 +1,343 @@
+:root {
+    --bg-color: #1a1a1a;
+    --surface-color: #242424;
+    --primary-color: #e63946;
+    --text-primary: #f1faee;
+    --text-secondary: #a8dadc;
+    --border-color: #454545;
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'Source Code Pro', monospace;
+    --border-radius: 16px; /* Raio de borda global */
+
+    /* Cores para os indicadores de sangramento */
+    --bleed-low: #3498db; /* Azul */
+    --bleed-medium: #f1c40f; /* Amarelo */
+    --bleed-high: #e74c3c; /* Vermelho */
+    --bleed-none: #444; /* Cinza */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.main-container {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+}
+
+.site-header {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: -2px;
+}
+
+.subtitle {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 500px;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.toolbar,
+.simulation-controls,
+#infoPanel,
+.scientific-explanation {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    width: 100%;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+}
+
+.tool-button {
+    flex-grow: 1;
+    padding: 12px;
+    border: none;
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tool-button:hover {
+    background-color: #3a3a3a;
+    color: var(--text-primary);
+}
+
+.tool-button.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.simulation-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-grow: 1;
+    min-width: 300px;
+    justify-content: center;
+}
+
+.control-group label {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.control-group input[type="range"],
+.control-group select {
+    flex-grow: 1;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.9rem;
+}
+
+#forceValue {
+    font-weight: 700;
+    color: var(--primary-color);
+    width: 60px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+/* --- NOVO DESIGN DA BARRA DE FORÇA --- */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 12px;
+    background: #444;
+    border-radius: 6px;
+    outline: none;
+    background-image: linear-gradient(var(--primary-color), var(--primary-color));
+    background-size: 50% 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: var(--text-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 4px solid var(--surface-color);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+
+#canvas-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--border-radius);
+    background-image: linear-gradient(rgba(18, 18, 18, 0.6), rgba(18, 18, 18, 0.6)), url('https://png.pngtree.com/background/20230524/original/pngtree-utilizing-black-brick-wall-texture-illustration-as-versatile-background-and-wallpaper-picture-image_2729994.jpg');
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#controls-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+#clearButton {
+    padding: 15px;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 12px;
+}
+
+#clearButton:hover {
+    filter: brightness(1.2);
+}
+
+#infoPanel {
+    padding: 25px;
+}
+
+#infoPanel h3 {
+    margin: 0 0 15px 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#event-description {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+#event-description strong {
+    color: var(--primary-color);
+}
+
+.placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.info-group {
+    margin-bottom: 25px;
+}
+.info-group:last-child {
+    margin-bottom: 0;
+}
+
+.info-group p {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.info-group .formula,
+.info-group .calculation {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    background-color: var(--bg-color);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    display: block;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.info-group .calculation {
+    margin-top: 8px;
+    background-color: #2a2a2e;
+}
+
+.info-group .result {
+    font-weight: 600;
+    color: #48cae4;
+}
+
+/* --- ESTILOS PARA CAIXA DE EXPLICAÇÃO E INDICADORES --- */
+.scientific-explanation {
+    padding: 0;
+    margin-top: 10px;
+}
+
+.scientific-explanation summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.2s ease;
+}
+.scientific-explanation[open] {
+    border-color: #555;
+}
+.scientific-explanation summary:hover {
+    background-color: #2a2a2e;
+}
+
+.scientific-explanation summary .icon {
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.scientific-explanation[open] > summary .icon {
+    transform: rotate(45deg);
+}
+
+.scientific-explanation summary::-webkit-details-marker { display: none; }
+
+.explanation-content {
+    padding: 0 25px 25px 25px;
+    border-top: 1px solid var(--border-color);
+    line-height: 1.7;
+    color: var(--text-secondary);
+}
+
+option {
+    background-color: var(--surface-color);
+    color: var(--text-primary);
+}
+
+.bleed-indicator {
+    float: right;
+    margin-left: 15px;
+    font-size: 1em;
+    letter-spacing: 3px;
+}
+
+.bleed-indicator.level-0 { color: var(--bleed-none); }
+.bleed-indicator.level-1 { color: var(--bleed-low); }
+.bleed-indicator.level-2 { color: var(--bleed-medium); }
+.bleed-indicator.level-3 { color: var(--bleed-high); }

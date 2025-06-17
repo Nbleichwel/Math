@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulador Forense Interativo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-container">
+        <header class="site-header">
+            <h1>Simulador de Manchas de Sangue</h1>
+            <p class="subtitle">Uma demonstração interativa da matemática na análise de cenas de crime.</p>
+        </header>
+
+        <main class="simulation-area">
+            <div class="toolbar">
+                <button class="tool-button active" data-tool="martelo">Martelo</button>
+                <button class="tool-button" data-tool="soco">Soco</button>
+                <button class="tool-button" data-tool="faca">Faca</button>
+                <button class="tool-button" data-tool="pistola">Pistola</button>
+            </div>
+
+            <div class="simulation-controls">
+                <div class="control-group" id="force-control-group">
+                    <label for="forceSlider">Força:</label>
+                    <input type="range" id="forceSlider" min="1" max="3" value="2" step="1">
+                    <span id="forceValue">Média</span>
+                </div>
+                <div class="control-group">
+                    <label for="bodyPartSelect">Região Alvo:</label>
+                    <select id="bodyPartSelect">
+                        <option value="TORAX">Tórax</option>
+                        <option value="CABECA">Cabeça</option>
+                        <option value="PESCOCO">Pescoço</option>
+                        <option value="ROSTO">Rosto</option>
+                        <option value="ABDOMEN">Abdômen</option>
+                        <option value="COSTAS">Costas</option>
+                        <option value="BRACOS">Braços</option>
+                        <option value="PERNAS">Pernas</option>
+                        <option value="MAOS">Mãos</option>
+                        <option value="PES">Pés</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="canvas-container">
+                </div>
+
+            <div id="controls-container">
+                <button id="clearButton">Limpar Simulação</button>
+                <div id="infoPanel">
+                    <h3>Análise do Evento</h3>
+                    <div id="event-description">
+                        <p class="placeholder">Aguardando simulação...</p>
+                    </div>
+                    <div id="info-content">
+                        </div>
+                </div>
+            </div>
+        </main>
+
+        <section class="scientific-explanation">
+            <details>
+                <summary>
+                    <span>A Ciência por Trás da Simulação</span>
+                    <span class="icon">+</span>
+                </summary>
+                <div class="explanation-content">
+                    <h4>Física e Geometria do Impacto</h4>
+                    <p>Gotas de sangue em voo mantêm uma forma esférica devido à tensão superficial. Ao atingir uma superfície, a geometria da mancha revela o ângulo do impacto. Um impacto a 90° cria uma mancha circular. Ângulos menores criam elipses progressivamente mais alongadas.</p>
+                    
+                    <h4>Trigonometria na Reconstituição</h4>
+                    <p>A perícia utiliza trigonometria para "reverter" a trajetória das gotas. As duas fórmulas principais são:</p>
+                    <ul>
+                        <li>
+                            <strong>Ângulo de Impacto (α):</strong> Determinado pela relação entre a largura e o comprimento da mancha.
+                            <code>α = arcsin(Largura / Comprimento)</code>
+                        </li>
+                        <li>
+                            <strong>Ponto de Origem (Altura H):</strong> Calculado usando o ângulo de impacto e a distância (d) da mancha até a área de convergência no plano.
+                            <code>H = tan(α) * d</code>
+                        </li>
+                    </ul>
+
+                    <h4>Padrões de Velocidade</h4>
+                    <p>A energia do impacto determina o padrão do respingo. O simulador representa três categorias:</p>
+                    <ul>
+                        <li><strong>Baixa Velocidade (Faca):</strong> Gotas grandes, formadas pela gravidade.</li>
+                        <li><strong>Média Velocidade (Soco, Martelo):</strong> Gotas menores, resultantes de um impacto contundente.</li>
+                        <li><strong>Alta Velocidade (Pistola):</strong> Gotículas minúsculas (<1mm) formando uma "névoa", causadas pela alta energia de um projétil.</li>
+                    </ul>
+                </div>
+            </details>
+        </section>
+        
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
