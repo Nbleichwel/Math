@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-
-    // --- CONFIGURAÇÃO INICIAL E ELEMENTOS DA UI ---
+    // --- ELEMENTOS DA UI ---
     const canvasContainer = document.getElementById('canvas-container');
     const canvas = document.createElement('canvas');
     canvas.width = canvasContainer.offsetWidth;
@@ -17,14 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const bodyPartSelect = document.getElementById('bodyPartSelect');
     const forceControlGroup = document.getElementById('force-control-group');
 
-    // --- ESTADO DA APLICAÇÃO ---
+    // --- ESTADO ---
     let ferramentaAtual = 'martelo';
     let regiaoAtual = 'TORAX';
     let forceLevel = 2;
     let manchas = [];
     const origem = { x: canvas.width / 2, y: canvas.height * 0.4, z: 120 };
 
-    // --- MATRIZ DE SANGRAMENTO (BASEADA NA SUA TABELA) ---
+    // --- DADOS DE PADRÃO ---
     const perfisDeSangramento = {
         SOCO:    { CABECA: [1, 2, 3], ROSTO: [2, 2, 3], PESCOCO: [1, 2, 2], TORAX: [0, 1, 1], ABDOMEN: [0, 0, 0], COSTAS: [0, 0, 0], BRACOS: [0, 1, 1], PERNAS: [0, 1, 1], MAOS: [0, 1, 1], PES: [0, 1, 1] },
         MARTELO: { CABECA: [2, 3, 4], ROSTO: [2, 3, 3], PESCOCO: [2, 3, 3], TORAX: [1, 2, 3], ABDOMEN: [1, 1, 2], COSTAS: [1, 1, 2], BRACOS: [1, 2, 2], PERNAS: [1, 2, 2], MAOS: [1, 1, 2], PES: [1, 1, 2] },
@@ -32,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         PISTOLA: { CABECA: [7], ROSTO: [6], PESCOCO: [7], TORAX: [7], ABDOMEN: [3, 4], COSTAS: [3, 4], BRACOS: [2, 5], PERNAS: [2, 5], MAOS: [1, 2], PES: [1, 2] }
     };
     const tiposDePadrao = {
-        0: { tipo: 'nenhum', nome: 'Sem Sangramento Visível' },
+        0: { tipo: 'nenhum', nome: 'Sem Sangramento Visível', volume: 0, dispersao: 0 },
         1: { tipo: 'gotejamento', volume: 5, dispersao: 10, nome: 'Gotejamento Leve (Localizado)' },
         2: { tipo: 'gotejamento_medio', volume: 15, dispersao: 30, nome: 'Gotejamento Moderado (Localizado)' },
         3: { tipo: 'impacto', volume: 25, dispersao: 60, nome: 'Impacto de Média Velocidade' },
@@ -41,13 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
         6: { tipo: 'nevoa_media', volume: 150, dispersao: 200, nome: 'Névoa de Alta Velocidade' },
         7: { tipo: 'nevoa_densa', volume: 250, dispersao: 250, nome: 'Névoa Densa de Alta Velocidade' }
     };
-    const classMap = { 0: 'level-0', 1: 'level-1', 2: 'level-1', 3: 'level-2', 4: 'level-2', 5: 'level-3', 6: 'level-3', 7: 'level-3' };
 
-    // --- FUNÇÕES DE LÓGICA E SIMULAÇÃO ---
+    // --- LÓGICA DE PADRÃO E ALEATORIEDADE ---
     function obterParametros() {
         const perfilArma = perfisDeSangramento[ferramentaAtual.toUpperCase()];
         if (!perfilArma) return tiposDePadrao[0];
-        
         const niveis = perfilArma[regiaoAtual];
         if (!niveis) return tiposDePadrao[0];
 
@@ -59,14 +56,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return tiposDePadrao[nivelDeSangramento] || tiposDePadrao[0];
     }
-    
-    function simularPadrao(clickX, clickY, parametros) {
-        if (parametros.tipo === 'nenhum') {
-            return;
-        }
 
-        let numeroDeGotas = Math.floor(parametros.volume * (0.8 + Math.random() * 0.4));
-        
+    // Variação realista (80% - 120% do volume base)
+    function quantidadeAleatoria(volumeBase) {
+        const min = Math.floor(volumeBase * 0.8);
+        const max = Math.ceil(volumeBase * 1.2);
+        if (max < 1) return 0;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Calcula o ângulo de impacto (degree), direção e área da mancha
+    function calcularAnaliseMancha(width, length, origem, x, y) {
+        // Ângulo de impacto (em graus)
+        const angleRad = Math.asin(width / length);
+        const angleDeg = angleRad * (180 / Math.PI);
+
+        // Direção da mancha
+        const dx = x - origem.x;
+        const dy = y - origem.y;
+        const directionRad = Math.atan2(dy, dx);
+        const directionDeg = directionRad * (180 / Math.PI);
+
+        // Área da mancha (aproximada elipse)
+        const area = Math.PI * (width/2) * (length/2);
+
+        return {
+            angleDeg: isNaN(angleDeg) ? null : angleDeg,
+            directionDeg,
+            area
+        };
+    }
+
+    function calcularPontoOrigem(anguloImpactoRad, distancia) {
+        // altura = distância * tan(θ)
+        return distancia * Math.tan(anguloImpactoRad);
+    }
+
+    function simularPadrao(clickX, clickY, parametros) {
+        if (parametros.tipo === 'nenhum') return { n: 0, analises: [] };
+
+        let numeroDeGotas = quantidadeAleatoria(parametros.volume);
+        if (numeroDeGotas < 1) numeroDeGotas = 1;
+
+        let analises = [];
+
         for (let i = 0; i < numeroDeGotas; i++) {
             let mancha;
             const { mancha: manchaBase } = calcularPropriedadesImpacto(clickX, clickY);
@@ -82,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mancha = { ...manchaBase, x: clickX + Math.cos(anguloDispersao) * raioDispersao, y: clickY + Math.sin(anguloDispersao) * raioDispersao, comprimento: 1 + Math.random() * 2, largura: 1 + Math.random() * 2, tipo: 'nevoa', highlight: 0, opacity: 0.7 };
             } else if (parametros.tipo.includes('gotejamento')) {
                 mancha = { ...manchaBase, x: clickX + (Math.random() - 0.5) * parametros.dispersao, y: clickY + (Math.random() - 0.5) * parametros.dispersao, comprimento: 20 + Math.random() * 10, largura: 18 + Math.random() * 8, tipo: 'gota' };
-            } else { // Impacto
+            } else {
                 const dispersao = parametros.dispersao || 60;
                 const clusterX = clickX + (Math.random() - 0.5) * dispersao;
                 const clusterY = clickY + (Math.random() - 0.5) * dispersao;
@@ -91,15 +124,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (!mancha.corBase) mancha.corBase = [130 + Math.random() * 30, 0, 0];
             manchas.push(mancha);
+
+            // Cálculos BPA para cada mancha
+            let width = mancha.largura;
+            let length = mancha.comprimento;
+            if (width > length) [width, length] = [length, width];
+            const analise = calcularAnaliseMancha(width, length, origem, mancha.x, mancha.y);
+            analise.distancia = Math.sqrt(Math.pow(mancha.x - origem.x, 2) + Math.pow(mancha.y - origem.y, 2));
+            analise.alturaOrigem = calcularPontoOrigem((analise.angleDeg || 0) * (Math.PI/180), analise.distancia);
+            analises.push(analise);
         }
+        return { n: numeroDeGotas, analises };
     }
-    
+
     function calcularPropriedadesImpacto(x, y) {
         const dx = x - origem.x;
         const dy = y - origem.y;
         const distanciaNoPlano = Math.sqrt(dx * dx + dy * dy) || 1;
         const alfa = Math.atan(origem.z / distanciaNoPlano);
-        
+
         const comprimentoBase = canvas.width * 0.035;
         const comprimento = comprimentoBase + Math.random() * (comprimentoBase * 0.4);
         const largura = Math.max(5, comprimento * Math.sin(alfa));
@@ -114,18 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
             espiculas.push({ startX, startY, endX: startX * (1 + Math.random() * 0.3), endY: startY * (1 + Math.random() * 0.3), lineWidth: Math.random() * 1.5 + 0.5 });
         }
         const mancha = { x, y, comprimento, largura, offsets, espiculas, tipo: 'impacto', highlight: 1.0, opacity: 1.0 };
-        return { mancha, distancia: distanciaNoPlano, alfa, comprimento, largura };
-    }
-    
-    function calcularPropriedadesReferencia(x,y) {
-        const dx = x - origem.x;
-        const dy = y - origem.y;
-        const distanciaNoPlano = Math.sqrt(dx * dx + dy * dy) || 1;
-        const alfa = Math.atan(origem.z / distanciaNoPlano);
-        return { distancia: distanciaNoPlano, alfa };
+        return { mancha, distanciaNoPlano, alfa, comprimento, largura };
     }
 
-    // --- MOTOR DE ANIMAÇÃO E DESENHO ---
+    // --- ANIMAÇÃO E DESENHO ---
     function loopDeAnimacao() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let i = manchas.length - 1; i >= 0; i--) {
@@ -139,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function desenharMancha(mancha) {
         if (mancha.highlight > 0) { ctx.shadowColor = `rgba(255, 80, 80, ${mancha.highlight})`; ctx.shadowBlur = 25; }
         ctx.fillStyle = `rgba(${mancha.corBase[0]}, ${mancha.corBase[1]}, ${mancha.corBase[2]}, ${mancha.opacity})`;
-        
+
         if (mancha.tipo === 'impacto') {
             const anguloRotacao = Math.atan2(mancha.y - origem.y, mancha.x - origem.x);
             ctx.save();
@@ -167,9 +202,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.shadowColor = 'transparent';
         ctx.shadowBlur = 0;
     }
-    
-    // --- FUNÇÕES DE INTERFACE (UI) ---
-    function atualizarPaineis(parametros, clickX, clickY) {
+
+    // --- UI ---
+    function atualizarPaineis(parametros, clickX, clickY, analiseBatch) {
         const arma = ferramentaAtual.charAt(0).toUpperCase() + ferramentaAtual.slice(1);
         const regiao = bodyPartSelect.options[bodyPartSelect.selectedIndex].text;
         const forca = forceValueDisplay.textContent;
@@ -185,60 +220,43 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const { distancia, alfa } = calcularPropriedadesReferencia(clickX, clickY);
-        const anguloGraus = alfa * (180 / Math.PI);
-        const nomeDaContagem = parametros.tipo.includes('nevoa') ? 'Gotículas' : 'Gotas/Manchas';
-        const { mancha: manchaRef } = calcularPropriedadesImpacto(clickX, clickY);
-        
+        // Mostra só a primeira análise detalhada (mancha de referência)
+        let analise = (analiseBatch && analiseBatch.analises && analiseBatch.analises.length) ? analiseBatch.analises[0] : null;
+        let angle = analise && analise.angleDeg ? analise.angleDeg.toFixed(2) : '—';
+        let direction = analise && analise.directionDeg ? analise.directionDeg.toFixed(1) : '—';
+        let area = analise && analise.area ? analise.area.toFixed(2) : '—';
+        let alturaOrigem = analise && analise.alturaOrigem ? analise.alturaOrigem.toFixed(2) : '—';
+
         infoContent.innerHTML = `
             <div class="info-group">
-                <p>Análise do Padrão</p>
-                <code class="calculation">↳ Quantidade Aprox.: <span class="result">${parametros.volume}</span></code>
+                <p><strong>Análise do Padrão</strong></p>
+                <code class="calculation">↳ Quantidade Aproximada Gerada: <span class="result">${analiseBatch ? analiseBatch.n : parametros.volume}</span></code>
             </div>
             <div class="info-group">
-                <p>Cálculo de Referência do Impacto (α)</p>
-                <code class="formula">α = arctan(Profundidade / Distância)</code>
-                <code class="calculation">↳ α = arctan(${origem.z.toFixed(0)} / ${distancia.toFixed(0)}) = <span class="result">${anguloGraus.toFixed(2)}°</span></code>
-            </div>`;
+                <p><strong>Ângulo de Impacto</strong></p>
+                <code class="calculation">↳ θ = arcsin (width / length) = <span class="result">${angle}°</span></code>
+            </div>
+            <div class="info-group">
+                <p><strong>Direção da Mancha</strong></p>
+                <code class="calculation">↳ Direção = <span class="result">${direction}°</span> em relação ao eixo X</code>
+            </div>
+            <div class="info-group">
+                <p><strong>Área da Mancha</strong></p>
+                <code class="calculation">↳ Área ≈ <span class="result">${area} px²</span></code>
+            </div>
+            <div class="info-group">
+                <p><strong>Altura do Ponto de Origem</strong></p>
+                <code class="calculation">↳ altura = distância * tan(θ) ≈ <span class="result">${alturaOrigem} px</span></code>
+            </div>
+        `;
     }
 
-    function atualizarIndicadoresDeSangramento() {
-        const perfilArma = perfisDeSangramento[ferramentaAtual.toUpperCase()];
-        if (!perfilArma) return;
-
-        Array.from(bodyPartSelect.options).forEach(option => {
-            const regiao = option.value.toUpperCase();
-            const niveis = perfilArma[regiao] || [0];
-            const maxNivel = Math.max(...niveis);
-            const classeNivel = classMap[maxNivel] || 'level-0';
-            
-            const indicatorSpan = option.querySelector('.bleed-indicator');
-            if (indicatorSpan) {
-                indicatorSpan.className = 'bleed-indicator';
-                indicatorSpan.classList.add(classeNivel);
-                
-                let dots = 0;
-                if(classeNivel === 'level-1') dots = 1;
-                if(classeNivel === 'level-2') dots = 2;
-                if(classeNivel === 'level-3') dots = 3;
-                indicatorSpan.textContent = '●'.repeat(dots);
-            }
-        });
-    }
-    
     // --- EVENTOS ---
-    function handleUserInteraction() {
-        const parametros = obterParametros();
-        atualizarPaineis(parametros, 0, 0);
-        infoContent.innerHTML = '<p class="placeholder">Clique na parede para simular o impacto.</p>';
-    }
-    
     toolButtons.forEach(button => button.addEventListener('click', () => {
         toolButtons.forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
         ferramentaAtual = button.dataset.tool;
         forceControlGroup.style.visibility = (ferramentaAtual === 'pistola') ? 'hidden' : 'visible';
-        atualizarIndicadoresDeSangramento();
         handleUserInteraction();
     }));
 
@@ -261,26 +279,30 @@ document.addEventListener('DOMContentLoaded', () => {
         infoContent.innerHTML = '';
         eventDescription.innerHTML = '<p class="placeholder">Aguardando simulação...</p>';
     });
-    
+
     canvas.addEventListener('click', (e) => {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
         const x = (e.clientX - rect.left) * scaleX;
         const y = (e.clientY - rect.top) * scaleY;
-        
+
         const parametros = obterParametros();
-        atualizarPaineis(parametros, x, y);
-        simularPadrao(x, y, parametros);
+        const analiseBatch = simularPadrao(x, y, parametros);
+        atualizarPaineis(parametros, x, y, analiseBatch);
     });
 
-    // --- INICIALIZAÇÃO ---
+    function handleUserInteraction() {
+        const parametros = obterParametros();
+        atualizarPaineis(parametros, 0, 0, { n: parametros.volume, analises: [] });
+        infoContent.innerHTML = '<p class="placeholder">Clique na parede para simular o impacto.</p>';
+    }
+
+    // --- INÍCIO ---
     function inicializar() {
         forceSlider.dispatchEvent(new Event('input'));
         handleUserInteraction();
-        atualizarIndicadoresDeSangramento();
         loopDeAnimacao();
     }
-    
     inicializar();
 });
