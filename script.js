@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+
     // --- ELEMENTOS DA UI ---
     const canvasContainer = document.getElementById('canvas-container');
     const canvas = document.createElement('canvas');
@@ -22,6 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let forceLevel = 2;
     let manchas = [];
     const origem = { x: canvas.width / 2, y: canvas.height * 0.4, z: 120 };
+
+    // --- IMAGEM CENTRAL ---
+    const pessoaImg = new Image();
+    pessoaImg.src = 'https://i.ibb.co/xqznzY51/Design-sem-nome.png';
+    let pessoaImgCarregada = false;
+    pessoaImg.onload = () => { pessoaImgCarregada = true; };
 
     // --- DADOS DE PADRÃO ---
     const perfisDeSangramento = {
@@ -153,10 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ANIMAÇÃO E DESENHO ---
     function loopDeAnimacao() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Desenha o ponto central da parede (origem de emissão do sangue)
+        drawPersonAtOrigin();
         drawOriginPoint();
-
         for (let i = manchas.length - 1; i >= 0; i--) {
             const mancha = manchas[i];
             if (mancha.highlight > 0) mancha.highlight -= 0.016;
@@ -175,6 +180,21 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.shadowBlur = 0;
         ctx.fill();
         ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawPersonAtOrigin() {
+        if (!pessoaImgCarregada) return;
+        // A imagem ficará centralizada acima do ponto de origem
+        // Supondo que a cabeça da imagem fique no ponto de origem (y), ajuste a altura e largura conforme necessário
+        const altura = canvas.height * 0.55;
+        const largura = altura * (pessoaImg.width / pessoaImg.height);
+        const x = origem.x - largura / 2;
+        const y = origem.y - altura * 0.45; // Para alinhar a cabeça/centro da imagem ao ponto de origem
+        ctx.save();
+        ctx.globalAlpha = 0.98;
+        ctx.drawImage(pessoaImg, x, y, largura, altura);
+        ctx.globalAlpha = 1;
         ctx.restore();
     }
 
@@ -311,4 +331,5 @@ document.addEventListener('DOMContentLoaded', () => {
         loopDeAnimacao();
     }
     inicializar();
+
 });
